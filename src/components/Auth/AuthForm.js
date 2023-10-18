@@ -5,7 +5,7 @@ import classes from "./AuthForm.module.css";
 const AuthForm = () => {
   const inputEmailref = useRef();
   const inputPasswordref = useRef();
-  const [isLoading,setIsLoading]=useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const [isLogin, setIsLogin] = useState(true);
 
@@ -18,38 +18,48 @@ const AuthForm = () => {
     const enteredEmail = inputEmailref.current.value;
     const enteredPassword = inputPasswordref.current.value;
 
-    setIsLoading(true)
+    setIsLoading(true);
 
-    if(isLogin){
+    let url;
+    if (isLogin) {
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyCwZv808OhRcTulajFFTsrXP6Qn3bwN-uE";
+    } else {
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCwZv808OhRcTulajFFTsrXP6Qn3bwN-uE";
+    }
+    fetch(url, {
+      method: "POST",
+      body: JSON.stringify({
+        email: enteredEmail,
+        password: enteredPassword,
+        returnSecureToken: true,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        setIsLoading(false);
+        if (res.ok) {
+          return res.json();
+        } else {
+          return res.json().then((data) => {
+            let errorMessage = "Authentication Failed!";
+            if (data && data.error && data.error.message) {
+              errorMessage = data.error.message;
+            }
 
-    }else{
-     
-      fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCwZv808OhRcTulajFFTsrXP6Qn3bwN-uE',{
-        method:'POST',
-        body:JSON.stringify({
-          email:enteredEmail,
-          password:enteredPassword,
-          returnSecureToken:true
-        }),
-        headers:{
-          'Content-Type':'application/json'
-        }
-      }).then(res =>{
-        setIsLoading(false)
-        if(res.ok){
-        
-
-        }else{
-         return res.json().then(data =>{
-           let errorMessage='Authentication Failed!';
-           if(data && data.error && data.error.message){
-            errorMessage=data.error.message
-           }
-           alert(errorMessage)
-          })
+            throw new Error(errorMessage);
+          });
         }
       })
-    }
+      .then((data) => {
+        console.log(data)
+      })
+      .catch((err) => {
+        alert(err.message);
+      });
   };
 
   return (
@@ -70,8 +80,10 @@ const AuthForm = () => {
           />
         </div>
         <div className={classes.actions}>
-         {!isLoading && <button>{isLogin ? 'Login' : 'Cretae Account'}</button>}
-         {isLoading && <p>Sending Request....</p>}
+          {!isLoading && (
+            <button>{isLogin ? "Login" : "Cretae Account"}</button>
+          )}
+          {isLoading && <p>Sending Request....</p>}
           <button
             type="button"
             className={classes.toggle}
