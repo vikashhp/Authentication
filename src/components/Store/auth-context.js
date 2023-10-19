@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 
 const AuthContext = React.createContext({
   token: "",
@@ -10,12 +11,17 @@ const AuthContext = React.createContext({
 export const AuthContextProvider = (props) => {
   const initialState = localStorage.getItem("token");
   const [token, setToken] = useState(initialState);
+  const history = useHistory();
 
   const userIsLoggedIn = !!token;
 
   const logInHandler = (token) => {
     setToken(token);
     localStorage.setItem("token", token);
+    setInterval(() => {
+      setToken(null);
+      //  history.replace('/')
+    }, 50000);
   };
 
   const logOutHandler = () => {
